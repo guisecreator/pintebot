@@ -1,0 +1,36 @@
+description: "Hello! My name is PinteBot and my task is to show pics based on your requests."
+any_tag_text: "Enter any tag by which you want to find the pin:"
+
+start_command:
+  inline_keyboard:
+    keyboard_row_1:
+      find_pin_via_tag_button: "Find pins 🅿️"
+    keyboard_row_2:
+      boards_button: "Find boards 🅱️"
+    keyboard_row_3:
+      settings_button: "Settings ⚙️"
+    keyboard_row_4:
+      help_button: "Help info ❓"
+    keyboard_row_5:
+      project_button: "GitHub"
+
+tags_command:
+  phrase: "Enter any tag:"
+  inline_keyboard:
+    keyboard_row_1:
+      next_button: "Next ⬇️"
+      cancel_button: "Cancel ✖️"
+
+boards_command:
+  inline_keyboard:
+    keyboard_row_1:
+      specific_users_boards_btn: "Find specific user's boards 🔎"
+    keyboard_row_2:
+      boards_by_title_btn: "Find pinterest boards by title 🔎"
+    keyboard_row_3:
+      history_of_boards_btn: "History boards"
+    keyboard_row_4:
+      help_button: "Help ❓"
+    keyboard_row_5:
+      back_to_start_btn: "Back ✖️"
+
