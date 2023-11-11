@@ -8,7 +8,7 @@ start_command:
     keyboard_row_2:
       boards_button: "Find boards 🅱️"
     keyboard_row_3:
-      settings_button: "Settings ⚙️"
+      settings_button: "Languages 🌍"
     keyboard_row_4:
       help_button: "Help info ❓"
     keyboard_row_5:

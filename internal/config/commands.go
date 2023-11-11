@@ -9,6 +9,17 @@ type CommandsText struct {
 	Description string `yaml:"description"`
 	AnyTagText  string `yaml:"any_tag_text"`
 
+	TagsCommand struct {
+		Phrase string `yaml:"phrase"`
+
+		InlineKeyboard struct {
+			KeyboardRow1 struct {
+				NextButton   string `yaml:"next_button"`
+				CancelButton string `yaml:"cancel_button"`
+			} `yaml:"keyboard_row_1"`
+		} `yaml:"inline_keyboard"`
+	} `yaml:"tags_command"`
+
 	StartCommand struct {
 		InlineKeyboard struct {
 			KeyboardRow1 struct {
@@ -32,17 +43,6 @@ type CommandsText struct {
 			} `yaml:"keyboard_row_5"`
 		} `yaml:"inline_keyboard"`
 	} `yaml:"start_command"`
-
-	TagsCommand struct {
-		Phrase string `yaml:"phrase"`
-
-		InlineKeyboard struct {
-			KeyboardRow1 struct {
-				NextButton   string `yaml:"next_button"`
-				CancelButton string `yaml:"cancel_button"`
-			} `yaml:"keyboard_row_1"`
-		} `yaml:"inline_keyboard"`
-	} `yaml:"tags_command"`
 
 	BoardsCommand struct {
 		InlineKeyboard struct {

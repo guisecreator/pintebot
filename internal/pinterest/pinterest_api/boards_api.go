@@ -1,4 +1,4 @@
-package api
+package pinterest_api
 
 import (
 	"fmt"

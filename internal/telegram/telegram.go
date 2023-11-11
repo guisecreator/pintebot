@@ -58,6 +58,11 @@ func NewTelegram(
 
 	botHandler.Group()
 
+	//Middleware here
+	botHandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
+		next(bot, update)
+	})
+
 	//opts := &gotgproto.ClientOpts{
 	//	AutoFetchReply: true,
 	//	SystemLangCode: "en",
@@ -72,14 +77,6 @@ func NewTelegram(
 	//if errClient != nil {
 	//	return nil, errClient
 	//}
-
-	//Middleware here
-	//bothandler := apiBotService.Handlers
-	//
-	//bothandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
-	//	fmt.Println("Global middleware") // Will be called first
-	//	next(bot, update)
-	//})
 
 	botServices = types.BotServices{
 		Config: &cfg,
@@ -99,7 +96,7 @@ func NewTelegram(
 func (service *TgBotService) StartService(ctx context.Context) error {
 	service.handleStopSignal()
 
-	service.initHandlers()
+	service.handlersInit()
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(

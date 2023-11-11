@@ -1,1 +1,1 @@
-# pinterest-bot-go
+# PinteBot

@@ -10,5 +10,6 @@ func NewCommandsHandler() (*CommandsHandler, error) {
 	return &CommandsHandler{
 		StartCommand:  &StartCommand{},
 		BoardsCommand: &BoardsCommand{},
+		TagsCommand:   &TagsCommand{},
 	}, nil
 }
