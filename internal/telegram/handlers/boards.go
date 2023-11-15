@@ -67,15 +67,16 @@ func (board *BoardsCommand) BuildKeyboard() *telego.InlineKeyboardMarkup {
 
 func (board *BoardsCommand) NewBoardCommand() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
-		inlineKeyboard := board.BuildKeyboard()
-
 		userId := tu.ID(update.CallbackQuery.From.ID)
-		messageText := "Board Commands:"
-		message := tu.Message(userId, messageText).
-			WithReplyMarkup(inlineKeyboard).
-			WithParseMode(telego.ModeHTML)
 
-		_, botErr := bot.SendMessage(message)
+		//inlineKeyboard := board.BuildKeyboard()
+
+		//messageText := "Board Commands:"
+		//message := tu.Message(userId, messageText).
+		//	WithReplyMarkup(inlineKeyboard).
+		//	WithParseMode(telego.ModeHTML)
+
+		_, botErr := bot.SendMessage(MessageError(userId, 23, "Command Error. Please try again later.", true))
 		if botErr != nil {
 			log.Printf("send message error: %v\n", botErr)
 		}

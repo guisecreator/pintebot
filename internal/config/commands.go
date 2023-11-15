@@ -6,19 +6,9 @@ import (
 )
 
 type CommandsText struct {
-	Description string `yaml:"description"`
-	AnyTagText  string `yaml:"any_tag_text"`
-
-	TagsCommand struct {
-		Phrase string `yaml:"phrase"`
-
-		InlineKeyboard struct {
-			KeyboardRow1 struct {
-				NextButton   string `yaml:"next_button"`
-				CancelButton string `yaml:"cancel_button"`
-			} `yaml:"keyboard_row_1"`
-		} `yaml:"inline_keyboard"`
-	} `yaml:"tags_command"`
+	Description            string `yaml:"description"`
+	AnyTagText             string `yaml:"any_tag_text"`
+	SuccessfulSearchByTags string `yaml:"successful_search_by_tags"`
 
 	StartCommand struct {
 		InlineKeyboard struct {
@@ -67,6 +57,17 @@ type CommandsText struct {
 			} `yaml:"keyboard_row_5"`
 		} `yaml:"inline_keyboard"`
 	} `yaml:"boards_command"`
+
+	TagsCommand struct {
+		Phrase string `yaml:"phrase"`
+
+		InlineKeyboard struct {
+			KeyboardRow1 struct {
+				NextButton   string `yaml:"next_button"`
+				CancelButton string `yaml:"cancel_button"`
+			} `yaml:"keyboard_row_1"`
+		} `yaml:"inline_keyboard"`
+	} `yaml:"tags_command"`
 }
 
 func InitCommandsText(path string) (CommandsText, error) {

@@ -11,6 +11,10 @@ func (service *TgBotService) handlersInit() error {
 	if err != nil {
 		log.Println(err)
 	}
+
+	//ps := service.BotServices.PinterestService
+	//predicate := handlers.NewPredicateService(ps)
+
 	// Start Bot.
 	service.Handlers.Handle(
 		handlers_init.
@@ -33,10 +37,15 @@ func (service *TgBotService) handlersInit() error {
 	)
 	service.Handlers.Handle(
 		handlers_init.
-			TagsCommand.
-			NewTagsCommand(),
+			TagsCommand.MessageTag(),
+		th.AnyCallbackQueryWithMessage(),
 		th.CallbackDataEqual("find_pin_via_tag"),
 	)
+	service.Handlers.Handle(
+		handlers_init.
+			TagsCommand.
+			NewTagsCommand(),
+		th.AnyMessage())
 
 	return nil
 }

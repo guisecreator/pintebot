@@ -1,5 +1,6 @@
 description: "Hello! My name is PinteBot and my task is to show pics based on your requests."
 any_tag_text: "Enter any tag by which you want to find the pin:"
+successful_search_by_tags: "The following pins were found matching your search:"
 
 start_command:
   inline_keyboard:

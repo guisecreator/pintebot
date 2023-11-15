@@ -11,12 +11,12 @@ type HandlersSessionManager[T Session] struct {
 }
 
 func (s *HandlersSessionManager[T]) Get() (*telegoapi.Response, error) {
-	requestData := telegoapi.RequestData{
-		ContentType: "Content-Type",
-		Buffer:      nil,
-	}
-
-	response, err := s.MockCaller.Call("Get", &requestData)
+	response, err := s.MockCaller.
+		Call("Get",
+			&telegoapi.RequestData{
+				ContentType: "Content-Type",
+				Buffer:      nil,
+			})
 	if err != nil {
 		return nil, err
 	}

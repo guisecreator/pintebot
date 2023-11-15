@@ -36,7 +36,7 @@ func main() {
 
 	services := &types.BotServices{
 		Config: cfg,
-		//Pinterest: pinterestService,
+		//PinterestAPI: pinterestService,
 	}
 
 	bot, err := telegram.NewTelegram(ctx, *cfg, *services, cfg.TgToken, logg)

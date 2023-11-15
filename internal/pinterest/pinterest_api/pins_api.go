@@ -13,7 +13,8 @@ type Pin struct {
 	PinCounts  *models.PinCounts
 }
 
-func GetPinsBySearch(
+// TODO: max кол-во запросов по пинам 30. то есть бот получает только 30 пинов за 1 запрос по тегу
+func (p *Pin) GetPinsBySearch(
 	client pinterest.Client,
 	tagName string,
 ) (*[]models.Pin, error) {

@@ -120,42 +120,27 @@ func (start *StartCommand) NewStartCommand() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
 		inlineKeyBoard := BuildKeyboard()
 
-		messageFilter := func(update *telego.Update) bool {
-			return update.Message != nil
+		user_id := tu.ID(update.Message.From.ID)
+
+		messages, err := config.InitCommandsText("locales/en.yaml")
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		mainInlineKeyBoard := inlineKeyBoard
-		if mainInlineKeyBoard != nil {
-			messageFilter(&update)
+		msgTextHello := messages.Description
+		if msgTextHello == "" {
+			msgTextHello = "Hello! I'm PinteBot and my greeting is broken."
 		}
 
-		if messageFilter(&update) {
-			userName := update.Message.From.Username
-			id := telego.ChatID{
-				ID:       update.Message.Chat.ID,
-				Username: userName,
-			}
+		message := tu.Message(
+			user_id,
+			msgTextHello,
+		).WithReplyMarkup(inlineKeyBoard).
+			WithParseMode(telego.ModeHTML)
 
-			messages, err := config.InitCommandsText("locales/en.yaml")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			msgTextHello := messages.Description
-			if msgTextHello == "" {
-				msgTextHello = "Hello! I'm PinteBot and my greeting is broken."
-			}
-
-			message := tu.Message(
-				id,
-				msgTextHello,
-			).WithReplyMarkup(inlineKeyBoard).
-				WithParseMode(telego.ModeHTML)
-
-			_, sendMsgErr := bot.SendMessage(message)
-			if sendMsgErr != nil {
-				log.Printf("send message error: %v\n", sendMsgErr)
-			}
+		_, sendMsgErr := bot.SendMessage(message)
+		if sendMsgErr != nil {
+			log.Printf("send message error: %v\n", sendMsgErr)
 		}
 	}
 }

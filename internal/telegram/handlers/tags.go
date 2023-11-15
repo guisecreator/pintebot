@@ -1,17 +1,13 @@
 package handlers
 
 import (
-	"bytes"
 	"github.com/carrot/go-pinterest"
 	"github.com/guisecreator/pintebot/internal/config"
-	"github.com/guisecreator/pintebot/internal/pinterest/pinterest_api"
 	"github.com/guisecreator/pintebot/internal/telegram/types"
-	"github.com/h2non/bimg"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/sirupsen/logrus"
-	"io"
 	"log"
 )
 
@@ -20,104 +16,106 @@ type TagsCommand struct {
 	logger *logrus.Logger
 }
 
-type NamedReaderImpl struct {
-	io.Reader
-	fileName string
-}
-
-func (n NamedReaderImpl) Name() string {
-	return n.fileName
-}
-
-const (
-	widthTgPhoto  = 512
-	heightTgPhoto = 512
-)
-
-func (tags *TagsCommand) SendUserMessageToPinterest() *telego.SendMessageParams {
+func (tags *TagsCommand) GetImageList() ([]string, error) {
 	panic("implement me")
 }
 
-func (tags *TagsCommand) SetImagesFromPinterest() ([]string, error) {
-	return nil, nil
-}
-
-// the message is processed, the line goes to Pinterest search
-func HandleUserMessage(update *telego.Update, client pinterest.Client) {
-	userMessage := update.Message.Text
-
-	_, err := pinterest_api.GetPinsBySearch(client, userMessage)
-	if err != nil {
-		log.Fatalf("get pins by search error: %v\n", err)
-	}
-}
-
-func (tags *TagsCommand) formatImageForTg(images []string) (*NamedReaderImpl, error) {
-	var (
-		processedBuffer bytes.Buffer
-		formattingErr   error
-	)
-
-	for _, photo := range images {
-		buf, err := bimg.Read(photo)
-		if err != nil {
-			tags.logger.Fatalf("read photo error: %v\n", formattingErr)
-			return nil, err
-		}
-
-		newImage, err := bimg.NewImage(buf).
-			Process(bimg.Options{
-				Width:   widthTgPhoto,
-				Height:  heightTgPhoto,
-				Crop:    true,
-				Quality: 95,
-			})
-		if err != nil {
-			tags.logger.Fatalf("process photo error: %v\n", formattingErr)
-			return nil, err
-		}
-
-		_, err = processedBuffer.Write(newImage)
-		if err != nil {
-			tags.logger.Fatalf("write processed photo to buffer error: %v\n", formattingErr)
-			return nil, err
-		}
-	}
-
-	processed := processedBuffer.Bytes()
-	if processed == nil {
-		return nil, formattingErr
-	}
-
-	//mb remove newReader?
-	newReader := bytes.NewReader(processed)
-
-	return &NamedReaderImpl{
-		Reader:   newReader,
-		fileName: string(processed),
-	}, nil
-}
-
-func (tags *TagsCommand) SendImageUser(id telego.ChatID) *telego.SendPhotoParams {
-	images, err := tags.SetImagesFromPinterest()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	formattedImages, err := tags.formatImageForTg(images)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	receivedFile := tu.File(formattedImages)
-	if receivedFile.String() == "" {
-		tags.logger.Error(err)
+// юзер что либо вводит, это обрабатывается. сообщение от юзера уходит в поиск пинов
+func (tags *TagsCommand) handleUserMessage(update *telego.Update, message string) error {
+	if message == "" {
 		return nil
 	}
 
-	return &telego.SendPhotoParams{
-		ChatID: id,
-		Photo:  receivedFile,
+	userId := update.Message.From.ID
+	if userId == 0 {
+		return nil
+	}
+
+	return nil
+}
+
+// здесь сообщения должны читаться, обрабатываться и отправляться юзеру
+func (tags *TagsCommand) handleImage(
+	id telego.ChatID,
+	photo telego.InputFile,
+) *telego.SendPhotoParams {
+
+	////imageList, err := tags.GetImageList()
+	////if err != nil {
+	////	return nil
+	////}
+	//
+	//files := []string{
+	//	"media/test.jpg",
+	//	"media/test2.jpg",
+	//	"media/test3.jpg",
+	//	"media/test4.jpg",
+	//}
+	//
+	//var photos []telego.InputFile
+	//
+	//for _, file := range files {
+	//	if file == "" {
+	//		return nil
+	//	}
+	//
+	//	uncovered, err := os.Open(file)
+	//	if err != nil {
+	//		tags.logger.Errorf("Error opening file: %v\n", err)
+	//		return nil
+	//	}
+	//	defer uncovered.Close()
+	//
+	//	formattedImage, err := img_processing.FormatImages(file)
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//
+	//	photos = append(photos, telego.InputFile{
+	//		File: formattedImage.GetReader(),
+	//	})
+	//
+	//}
+	//
+	//photo = telego.InputFile{
+	//	File: photos,
+	//}
+	//
+	//return &telego.SendPhotoParams{
+	//	ChatID: id,
+	//	Photo:  photo,
+	//}
+}
+
+func (tags *TagsCommand) handleDownloadImage(update *telego.Update, client pinterest.Client) {
+	panic("implement me")
+}
+
+// TODO: implement me
+func (tags *TagsCommand) NextImageQuery() {
+	panic("implement me")
+}
+
+func (tags *TagsCommand) MessageTag() th.Handler {
+	return func(bot *telego.Bot, update telego.Update) {
+		messages, err := config.InitCommandsText("locales/en.yaml")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		userId := tu.ID(update.CallbackQuery.From.ID)
+
+		messageText := messages.AnyTagText
+		message := tu.Message(
+			userId,
+			messageText,
+		).WithParseMode(telego.ModeHTML)
+
+		_, botErr := bot.SendMessage(message)
+		if botErr != nil {
+			log.Printf("send message error: %v\n", botErr)
+		}
+
 	}
 }
 
@@ -128,44 +126,64 @@ func (tags *TagsCommand) NewTagsCommand() th.Handler {
 			log.Fatal(err)
 		}
 
-		userId := tu.ID(update.CallbackQuery.From.ID)
-		if update.Message != nil && update.Message.Text != "" {
-			inlineKeyboard := tu.Keyboard(
+		//pinsName, isPinsName := GetUserMessage(update)
+		//if !isPinsName {
+		//	tags.logger.Printf("get pins name error: %v\n", pinsName)
+		//	return
+		//}
+		userId := tu.ID(update.Message.From.ID)
+
+		pinsName := update.Message.Text
+		if pinsName == "" {
+			_, msgerr := bot.SendMessage(
+				MessageError(userId, 1, "Message Error", true),
+			)
+			if msgerr != nil {
+				tags.logger.Errorf("send message to %v user: %v", userId, msgerr)
+			}
+			return
+		}
+
+		//TODO: сделать обработку команды(и кнопки соответсвенно) Next, при нажатии на которую бот будет переходить на следующий пин
+		if pinsName != "" {
+			buttonMessage := tu.Message(
+				userId,
+				messages.SuccessfulSearchByTags+update.Message.Text,
+			)
+			_, buttonErr := bot.SendMessage(buttonMessage)
+			if buttonErr != nil {
+				tags.logger.Errorf("send button error: %v\n", buttonErr)
+			}
+
+			sendPhotoParams := tags.handleImage(
+				userId, telego.InputFile{},
+			).WithReplyMarkup(
+				tu.InlineKeyboard(
+					tu.InlineKeyboardRow(
+						tu.InlineKeyboardButton("Download this image").
+							WithCallbackData("download"),
+					),
+					tu.InlineKeyboardRow(
+						tu.InlineKeyboardButton("Cancel").
+							WithCallbackData("cancel"),
+					),
+				),
+			).WithReplyMarkup(tu.Keyboard(
 				tu.KeyboardRow(
 					tu.KeyboardButton(
 						messages.TagsCommand.InlineKeyboard.
 							KeyboardRow1.NextButton,
 					),
 				),
-			).WithResizeKeyboard()
+			).WithResizeKeyboard())
 
-			buttonMessage := tu.Message(
-				userId,
-				"",
-			).WithReplyMarkup(inlineKeyboard)
-			_, buttonErr := bot.SendMessage(buttonMessage)
-			if buttonErr != nil {
-				tags.logger.Errorf("send button error: %v\n", buttonErr)
-			}
-
-			//add a cancel command button to the photo that was sent to the user
-			_, sendPhotoErr := bot.SendPhoto(tags.SendImageUser(userId))
+			_, sendPhotoErr := bot.SendPhoto(sendPhotoParams)
 			if sendPhotoErr != nil {
 				tags.logger.Errorf("send photo error: %v\n", sendPhotoErr)
 				return
 			}
 
-		} else {
-			messageText := messages.AnyTagText
-			message := tu.Message(
-				userId,
-				messageText,
-			).WithParseMode(telego.ModeHTML)
-
-			_, botErr := bot.SendMessage(message.WithProtectContent())
-			if botErr != nil {
-				log.Printf("send message error: %v\n", botErr)
-			}
+			//bot.FileDownloadURL(sendPhotoParams.Photo.FileID)
 		}
 	}
 }
