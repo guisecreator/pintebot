@@ -26,7 +26,6 @@ type TgBotService struct {
 }
 
 func NewTelegram(
-	ctx context.Context,
 	cfg config.Config,
 	botServices types.BotServices,
 	token string,
@@ -63,21 +62,6 @@ func NewTelegram(
 		next(bot, update)
 	})
 
-	//opts := &gotgproto.ClientOpts{
-	//	AutoFetchReply: true,
-	//	SystemLangCode: "en",
-	//}
-	//
-	//newClient, errClient := gotgproto.NewClient(
-	//	apiBotService.BotServices.Config.AppID,
-	//	apiBotService.BotServices.Config.ApiHash,
-	//	apiBotService.BotServices.Config.CType,
-	//	opts,
-	//)
-	//if errClient != nil {
-	//	return nil, errClient
-	//}
-
 	botServices = types.BotServices{
 		Config: &cfg,
 	}
@@ -85,9 +69,8 @@ func NewTelegram(
 	apiBotService = &TgBotService{
 		Bot:         bot,
 		BotServices: botServices,
-		//Client:      *newClient,
-		Handlers: botHandler,
-		Logger:   *log,
+		Handlers:    botHandler,
+		Logger:      *log,
 	}
 
 	return apiBotService, nil

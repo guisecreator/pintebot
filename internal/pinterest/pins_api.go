@@ -1,41 +1,25 @@
-package pinterest_api
+package pinterest
 
 import (
 	"fmt"
-	"github.com/carrot/go-pinterest"
 	"github.com/carrot/go-pinterest/controllers"
 	"github.com/carrot/go-pinterest/models"
 )
 
-type Pin struct {
-	Controller *controllers.PinsController
-	PinModel   *models.Pin
-	PinCounts  *models.PinCounts
-}
-
 // TODO: max кол-во запросов по пинам 30. то есть бот получает только 30 пинов за 1 запрос по тегу
-func (p *Pin) GetPinsBySearch(
-	client pinterest.Client,
-	tagName string,
-) (*[]models.Pin, error) {
-	pins, page, err := client.Me.Search.Pins.Fetch(
+func (p *PinterestServiceApi) GetPinsBySearch(tagName string) (*[]models.Pin, error) {
+	pins, page, err := p.Client.Me.Search.Pins.Fetch(
 		tagName,
 		&controllers.MeSearchPinsFetchOptionals{
 			Cursor: "some-cursor",
-			Limit:  15,
+			Limit:  30,
 		},
 	)
-	if pinterestError, ok := err.(*models.PinterestError); ok {
-		if pinterestError.StatusCode == 404 {
-			_ = fmt.Errorf("pin fetch error: %s", pins)
-		} else {
-			return nil, err
-		}
-	} else {
+	if err != nil {
 		return nil, err
 	}
 
-	user, userErr := client.Users.Fetch((*pins)[0].Creator.Id)
+	user, userErr := p.Client.Users.Fetch((*pins)[0].Creator.Id)
 	if userErr != nil {
 		return nil, userErr
 	}
@@ -61,8 +45,8 @@ func (p *Pin) GetPinsBySearch(
 	return pins, nil
 }
 
-func (p *Pin) GetPinById(client pinterest.Client, pinId string) (*models.Pin, error) {
-	pin, err := client.Pins.Fetch(pinId)
+func (p *PinterestServiceApi) GetPinById(pinId string) (*models.Pin, error) {
+	pin, err := p.Client.Pins.Fetch(pinId)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +54,6 @@ func (p *Pin) GetPinById(client pinterest.Client, pinId string) (*models.Pin, er
 	return pin, nil
 }
 
-func (p *Pin) GetPinsByIds(client pinterest.Client, pinIds []string) (*[]models.Pin, error) {
-	//pins := make([]models.Pin, 0)
-
-	return nil, nil
+func (p *PinterestServiceApi) GetPinsByIds(pinIds []string) (*[]models.Pin, error) {
+	panic("implement me")
 }

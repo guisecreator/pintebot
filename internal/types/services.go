@@ -10,7 +10,7 @@ import (
 type BotServices struct {
 	Config       *config.Config
 	PinterestAPI *pinterest.PinterestServiceApi
-	//Boards       *pinterest_api.Board
+	//Boards       *pinterest.PinterestServiceApi
 	//Tags         *pinterest_api.Pin
 	Tags  *models.Tag
 	Users *models.User

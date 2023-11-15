@@ -1,4 +1,4 @@
-package pinterest_api
+package pinterest
 
 import (
 	"fmt"
@@ -6,22 +6,16 @@ import (
 	"github.com/carrot/go-pinterest/models"
 )
 
-type Board struct {
-	Controller  *controllers.BoardsController
-	BoardModel  *models.Board
-	BoardCounts *models.BoardCounts
-}
-
-func (b *Board) GetBoardsFromUserID(userId string) (*models.Board, error) {
+func (p *PinterestServiceApi) GetBoardsFromUserID(userId string) (*models.Board, error) {
 	panic("implement me")
 }
 
-func (b *Board) GetBoards(boardIds, board []string) ([]*models.Board, error) {
+func (p *PinterestServiceApi) GetBoards(boardIds, board []string) ([]*models.Board, error) {
 	panic("implement me")
 }
 
-func (b *Board) GetBoard(boardId string) (*models.Board, error) {
-	getBoard, err := b.Controller.Fetch(boardId)
+func (p *PinterestServiceApi) GetBoard(boardId string) (*models.Board, error) {
+	getBoard, err := p.Client.Boards.Fetch(boardId)
 	if pinterestError, ok := err.(*models.PinterestError); ok {
 		if pinterestError.StatusCode == 404 {
 			_ = fmt.Errorf("board not found with id: %s", boardId)
@@ -35,14 +29,14 @@ func (b *Board) GetBoard(boardId string) (*models.Board, error) {
 	return getBoard, nil
 }
 
-func (b *Board) UpdateBoard(boardSpec string) (*models.Board, error) {
+func (p *PinterestServiceApi) UpdateBoard(boardSpec string) (*models.Board, error) {
 	updateOptionals := controllers.
-		BoardUpdateOptionals{
+	BoardUpdateOptionals{
 		Name:        "test",
 		Description: "test",
 	}
 
-	update, err := b.Controller.Update(boardSpec, &updateOptionals)
+	update, err := p.Client.Boards.Update(boardSpec, &updateOptionals)
 	if err != nil {
 		return nil, err
 	}

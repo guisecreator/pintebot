@@ -39,7 +39,7 @@ func main() {
 		//PinterestAPI: pinterestService,
 	}
 
-	bot, err := telegram.NewTelegram(ctx, *cfg, *services, cfg.TgToken, logg)
+	bot, err := telegram.NewTelegram(*cfg, *services, cfg.TgToken, logg)
 	if err != nil {
 		logg.Panicf("telegram service init: %v", err)
 	}

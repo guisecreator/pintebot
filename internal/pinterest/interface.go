@@ -1,4 +1,4 @@
-package pinterest_api
+package pinterest
 
 import (
 	"github.com/carrot/go-pinterest"
