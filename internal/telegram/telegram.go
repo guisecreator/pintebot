@@ -58,9 +58,9 @@ func NewTelegram(
 	botHandler.Group()
 
 	//Middleware here
-	botHandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
-		next(bot, update)
-	})
+	//botHandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
+	//	next(bot, update)
+	//})
 
 	botServices = types.BotServices{
 		Config: &cfg,

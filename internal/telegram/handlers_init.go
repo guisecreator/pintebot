@@ -17,35 +17,36 @@ func (service *TgBotService) handlersInit() error {
 
 	// Start Bot.
 	service.Handlers.Handle(
-		handlers_init.
-			StartCommand.
-			NewStartCommand(),
+		handlers_init.StartCommand.NewStartCommand(),
 		th.CommandEqual("start"),
 	)
 	// Redirect to main menu.
 	service.Handlers.Handle(
-		handlers_init.
-			StartCommand.
-			HandleStartCallback(),
+		handlers_init.StartCommand.HandleStartCallback(),
 		th.CallbackDataEqual("cancel"),
 	)
+
 	service.Handlers.Handle(
-		handlers_init.
-			BoardsCommand.
-			NewBoardCommand(),
+		handlers_init.BoardsCommand.NewBoardCommand(),
 		th.CallbackDataEqual("boards"),
 	)
+
 	service.Handlers.Handle(
-		handlers_init.
-			TagsCommand.MessageTag(),
+		handlers_init.TagsCommand.MessageTag(),
 		th.AnyCallbackQueryWithMessage(),
 		th.CallbackDataEqual("find_pin_via_tag"),
 	)
+
 	service.Handlers.Handle(
-		handlers_init.
-			TagsCommand.
-			NewTagsCommand(),
-		th.AnyMessage())
+		handlers_init.TagsCommand.NewTagsCommand(),
+		th.AnyMessage(),
+	)
+
+	//Help information command
+	service.Handlers.Handle(
+		handlers_init.HelpCommand.HelpCommand(),
+		th.CallbackDataEqual("help_info"),
+	)
 
 	return nil
 }

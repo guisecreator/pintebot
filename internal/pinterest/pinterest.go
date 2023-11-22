@@ -9,29 +9,35 @@ type PinterestServiceApi struct {
 	Client *pinterest.Client
 }
 
-func NewPinterestService(
-	clientId string,
-	clientSecret string,
-	token string,
-) (*PinterestServiceApi, error) {
-	newClient := pinterest.NewClient()
-
-	if token == "" {
+func NewPinterestService(accessToken string) (*PinterestServiceApi, error) {
+	if accessToken == "" {
 		return nil, errors.New("token is empty")
 	}
 
-	_, err := newClient.OAuth.Token.Create(
+	newClient := pinterest.
+		NewClient().
+		RegisterAccessToken(accessToken)
+
+	return &PinterestServiceApi{
+		Client: newClient,
+	}, nil
+}
+
+// Generate access token
+func (p *PinterestServiceApi) Authenticate(
+	clientId string,
+	clientSecret string,
+	accessCode string,
+) (*PinterestServiceApi, error) {
+
+	_, err := p.Client.OAuth.Token.Create(
 		clientId,
 		clientSecret,
-		token,
+		accessCode,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	newClient.RegisterAccessToken(token)
-
-	return &PinterestServiceApi{
-		Client: newClient,
-	}, nil
+	return p, nil
 }

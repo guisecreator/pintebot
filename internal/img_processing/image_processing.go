@@ -1,47 +1,35 @@
 package img_processing
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/h2non/bimg"
+	"github.com/disintegration/imaging"
+	"github.com/mymmrac/telego"
+	"log"
 )
 
-func FormatImage(image_path string) (*NamedReaderImpl, error) {
-	var (
-		processedBuffer bytes.Buffer
-		formattingErr   error
-	)
+func FormatImageForTelegram(
+	update telego.Update,
+	path string,
+) (*telego.InputFile, error) {
 
-	buf, err := bimg.Read(image_path)
+	src, err := imaging.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("read image error: %v\n", err)
+		log.Fatalf("failed to open image: %v", err)
 	}
 
-	newImage, err := bimg.NewImage(buf).
-		Process(bimg.Options{
-			Width:   512,
-			Height:  512,
-			Crop:    true,
-			Quality: 95,
+	src = imaging.CropAnchor(src, 300, 300, imaging.Center)
+
+	dstImage128 := imaging.Resize(src, 128, 128,
+		imaging.ResampleFilter{
+			Support: 342,
+			Kernel: func(f float64) float64 {
+				return f
+			},
 		})
+
+	err = imaging.Save(dstImage128, "testdata/out_example.jpg")
 	if err != nil {
-		return nil, fmt.Errorf("process image error: %v\n", err)
+		log.Fatalf("failed to save image: %v", err)
 	}
 
-	_, err = processedBuffer.Write(newImage)
-	if err != nil {
-		return nil, err
-	}
-
-	processed := processedBuffer.Bytes()
-	if processed == nil {
-		return nil, formattingErr
-	}
-
-	newReader := bytes.NewReader(processed)
-
-	return &NamedReaderImpl{
-		reader:   newReader,
-		fileName: string(processed),
-	}, nil
+	return &telego.InputFile{}, nil
 }

@@ -43,20 +43,6 @@ func (board *BoardsCommand) BuildKeyboard() *telego.InlineKeyboardMarkup {
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(
 				messages.BoardsCommand.InlineKeyboard.
-					KeyboardRow3.HistoryOfBoardsButton,
-			).
-				WithCallbackData("history_boards"),
-		),
-		tu.InlineKeyboardRow(
-			tu.InlineKeyboardButton(
-				messages.BoardsCommand.InlineKeyboard.
-					KeyboardRow4.HelpButton,
-			).
-				WithCallbackData("back_to_main_menu"),
-		),
-		tu.InlineKeyboardRow(
-			tu.InlineKeyboardButton(
-				messages.BoardsCommand.InlineKeyboard.
 					KeyboardRow5.BackToStartButton,
 			).
 				WithCallbackData("cancel"),
@@ -70,7 +56,7 @@ func (board *BoardsCommand) NewBoardCommand() th.Handler {
 		userId := tu.ID(update.CallbackQuery.From.ID)
 
 		//inlineKeyboard := board.BuildKeyboard()
-
+		//
 		//messageText := "Board Commands:"
 		//message := tu.Message(userId, messageText).
 		//	WithReplyMarkup(inlineKeyboard).

@@ -18,6 +18,6 @@ func (p *PinterestService) CreatePinterestService(userId int64) {
 	p.PinterestMap[userId] = &PinterestElement{}
 }
 
-func (p *PinterestService) DeleteFsm(chatId int64) {
+func (p *PinterestService) DeleteService(chatId int64) {
 	delete(p.PinterestMap, chatId)
 }

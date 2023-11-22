@@ -14,7 +14,7 @@ type Config struct {
 	TgToken       string `required:"true"   envconfig:"TELEGRAM_TOKEN"`
 	AppID         int    `required:"false"  envconfig:"APP_ID"`
 	ApiHash       string `required:"false"  envconfig:"API_HASH"`
-	PToken        string `required:"false"  envconfig:"PINTEREST_TOKEN"`
+	PUserToken    string `required:"false"  envconfig:"PINTEREST_TOKEN"`
 	PClientId     string `required:"false"  envconfig:"PINTEREST_CLIENT_ID"`
 	PClientSecret string `required:"false"  envconfig:"PINTEREST_CLIENT_SECRET"`
 	DatabaseURL   string `required:"false"  envconfig:"DATABASE_URL"`

@@ -4,6 +4,7 @@ type CommandsHandler struct {
 	StartCommand  *StartCommand
 	BoardsCommand *BoardsCommand
 	TagsCommand   *TagsCommand
+	HelpCommand   *HelpCommand
 }
 
 func NewCommandsHandler() (*CommandsHandler, error) {
@@ -11,5 +12,6 @@ func NewCommandsHandler() (*CommandsHandler, error) {
 		StartCommand:  &StartCommand{},
 		BoardsCommand: &BoardsCommand{},
 		TagsCommand:   &TagsCommand{},
+		HelpCommand:   &HelpCommand{},
 	}, nil
 }

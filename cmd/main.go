@@ -21,16 +21,12 @@ func main() {
 		logg.Panicf("commands init: %v", err)
 	}
 
-	//pinterestService, err := pinterest.
-	//	NewPinterestService(
-	//		cfg.PClientId,
-	//		cfg.PClientSecret,
-	//		"",
-	//		cfg,
-	//	)
+	//pinterestService, err := pinterest.NewPinterestService()
 	//if err != nil {
 	//	logg.Panicf("pinterest service init: %v", err)
 	//}
+	//
+	//pinterestService.Authenticate(cfg.ClientId, cfg.ClientSecret, cfg.AccessCode)
 
 	ctx, _ := context.WithCancel(context.Background())
 
@@ -45,5 +41,4 @@ func main() {
 	}
 
 	bot.StartService(ctx)
-
 }

@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/pinterest_service"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
-	tu "github.com/mymmrac/telego/telegoutil"
 	"log"
 )
 
@@ -21,7 +19,9 @@ func NewPredicateService(ps *pinterest_service.PinterestService) *PredicateServi
 
 func (p *PredicateService) PinterestServicePredicate(step string) th.Predicate {
 	return func(update telego.Update) bool {
-		if update.Message == nil || update.Message.From == nil || update.Message.Text == "" {
+		if update.Message == nil ||
+			update.Message.From == nil ||
+			update.Message.Text == "" {
 			log.Printf("UPDATE MSG NIL or TEXT is empty")
 			return false
 		}
@@ -43,35 +43,5 @@ func (p *PredicateService) PinterestServicePredicate(step string) th.Predicate {
 		}
 
 		return stepNow.Step == step
-	}
-}
-
-func (p *PredicateService) FirstMessage(step string) th.Predicate {
-	return func(update telego.Update) bool {
-		messages, err := config.InitCommandsText("locales/en.yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		//pinsName, isPinsName := GetUserMessage(update)
-		//if !isPinsName {
-		//	tags.logger.Printf("get pins name error: %v\n", pinsName)
-		//	return
-		//}
-		userId := tu.ID(update.Message.From.ID)
-
-		messageText := messages.AnyTagText
-		message := tu.Message(
-			userId,
-			messageText,
-		).WithParseMode(telego.ModeHTML)
-
-		bot := telego.Bot{}
-
-		_, botErr := bot.SendMessage(message)
-		if botErr != nil {
-			log.Printf("send message error: %v\n", botErr)
-		}
-		return true
 	}
 }

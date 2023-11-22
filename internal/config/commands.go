@@ -9,6 +9,7 @@ type CommandsText struct {
 	Description            string `yaml:"description"`
 	AnyTagText             string `yaml:"any_tag_text"`
 	SuccessfulSearchByTags string `yaml:"successful_search_by_tags"`
+	HelpInfoText           string `yaml:"help_info_text"`
 
 	StartCommand struct {
 		InlineKeyboard struct {
