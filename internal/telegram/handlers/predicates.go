@@ -45,3 +45,15 @@ func (p *PredicateService) PinterestServicePredicate(step string) th.Predicate {
 		return stepNow.Step == step
 	}
 }
+
+func (p *PredicateService) NewTagsPredicate() th.Predicate {
+	return func(update telego.Update) bool {
+		if update.Message == nil ||
+		update.Message.ReplyToMessage == nil ||
+		update.Message.ReplyToMessage.Text == "" {
+
+			return update.Message.ReplyToMessage.Text == "/find_pins"
+		}
+		return false
+	}
+}

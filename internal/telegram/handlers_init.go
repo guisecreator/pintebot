@@ -3,48 +3,50 @@ package telegram
 import (
 	"github.com/guisecreator/pintebot/internal/telegram/handlers"
 	th "github.com/mymmrac/telego/telegohandler"
-	"log"
 )
 
 func (service *TgBotService) handlersInit() error {
-	handlers_init, err := handlers.NewCommandsHandler()
-	if err != nil {
-		log.Println(err)
-	}
+	handlersInit :=  handlers.CommandsHandler{}
 
 	//ps := service.BotServices.PinterestService
 	//predicate := handlers.NewPredicateService(ps)
 
 	// Start Bot.
 	service.Handlers.Handle(
-		handlers_init.StartCommand.NewStartCommand(),
+		handlersInit.StartCommand.NewStartCommand(),
 		th.CommandEqual("start"),
 	)
 	// Redirect to main menu.
 	service.Handlers.Handle(
-		handlers_init.StartCommand.HandleStartCallback(),
+		handlersInit.StartCommand.HandleStartCallback(),
 		th.CallbackDataEqual("cancel"),
 	)
 
+	//Unknow command
 	service.Handlers.Handle(
-		handlers_init.BoardsCommand.NewBoardCommand(),
+		handlersInit.StartCommand.NotSupportedCommand(),
+		th.AnyMessage(),
+	)
+
+	service.Handlers.Handle(
+		handlersInit.BoardsCommand.NewBoardCommand(),
 		th.CallbackDataEqual("boards"),
 	)
 
 	service.Handlers.Handle(
-		handlers_init.TagsCommand.MessageTag(),
+		handlersInit.TagsCommand.MessageTag(),
 		th.AnyCallbackQueryWithMessage(),
 		th.CallbackDataEqual("find_pin_via_tag"),
 	)
 
 	service.Handlers.Handle(
-		handlers_init.TagsCommand.NewTagsCommand(),
-		th.AnyMessage(),
+		handlersInit.TagsCommand.NewTagsCommand(),
+		th.TextEqual("find_pins"),
 	)
 
 	//Help information command
 	service.Handlers.Handle(
-		handlers_init.HelpCommand.HelpCommand(),
+		handlersInit.HelpCommand.HelpCommand(),
 		th.CallbackDataEqual("help_info"),
 	)
 

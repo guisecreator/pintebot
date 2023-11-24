@@ -57,10 +57,26 @@ func NewTelegram(
 
 	botHandler.Group()
 
+	done := make(chan struct{}, 1)
+	stop := make(chan struct{}, 1)
+
 	//Middleware here
 	//botHandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
 	//	next(bot, update)
 	//})
+
+	botHandler.Use(
+		func(bot *telego.Bot, update telego.Update, next th.Handler) {
+			go func() {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Error(r)
+					}
+				}()
+				next(bot, update)
+			}()
+		},
+	)
 
 	botServices = types.BotServices{
 		Config: &cfg,
@@ -71,6 +87,8 @@ func NewTelegram(
 		BotServices: botServices,
 		Handlers:    botHandler,
 		Logger:      *log,
+		stop:        stop,
+		done:        done,
 	}
 
 	return apiBotService, nil

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/state"
@@ -26,7 +25,6 @@ type TagsCommand struct {
 	*types.CommandsOptions
 	logger         *logrus.Logger
 	UserImageStore *UserImageStore
-	cfg            *config.Config
 }
 
 func (tags *TagsCommand) GetImageList(
@@ -71,11 +69,7 @@ func (tags *TagsCommand) GetImageList(
 		}
 		defer imageData.Body.Close()
 
-		imageName := fmt.Sprintf(
-			"media/%s/%s.jpg",
-			messageRequest,
-			pin.Note,
-		)
+		imageName := fmt.Sprintf("media/%s/%s.jpg", messageRequest, pin.Note)
 		imageFile, createErr := os.Create(imageName)
 		if createErr != nil {
 			return nil, createErr
@@ -124,79 +118,73 @@ func (tags *TagsCommand) handleNextImageQuery(
 	chatID telego.ChatID,
 	update telego.Update,
 ) *telego.SendPhotoParams {
-	if chatID.ID == 0 {
-		tags.logger.Error("Empty chatID")
-		return nil
+	filePath := "media/test.jpg"
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		tags.logger.Errorf("Ошибка при открытии файла: %v\n", err)
 	}
-
-	imageList, exist := tags.UserImageStore.ImageLists[chatID.ID]
-	if !exist {
-		tags.logger.Error("Empty image list")
-		return nil
-	}
-
-	currentIndex, exists := tags.UserImageStore.CurrentIndices[chatID.ID]
-	if !exists {
-		currentIndex = 0
-	}
-
-	// increment the index or reset if the end of the list is reached
-	currentIndex = (currentIndex + 1) % len(imageList)
-	tags.UserImageStore.CurrentIndices[chatID.ID] = currentIndex
-
-	imageData := []byte(imageList[currentIndex])
-	reader := bytes.NewReader(imageData)
 
 	photo := telego.InputFile{
-		File: tu.NameReader(reader, "image"),
+		File: file,
 	}
 
-	sendPhotoParams := &telego.SendPhotoParams{
-		ChatID:              tu.ID(chatID.ID),
-		Photo:               photo,
-		DisableNotification: false,
-		ParseMode:           telego.ModeHTML,
-		Caption:             "",
+	return &telego.SendPhotoParams{
+		ChatID: chatID,
+		Photo:  photo,
 	}
-
-	return sendPhotoParams
 }
 
 func (tags *TagsCommand) MessageTag() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
-		user_id := tu.ID(update.CallbackQuery.From.ID)
-		callback_id := update.CallbackQuery.ID
+		// userId := tu.ID(update.Message.From.ID)
 
-		messages, err := config.InitCommandsText("locales/en.yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
+		// messages, err := config.InitCommandsText("locales/en.yaml")
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 
-		_, botErr := bot.SendMessage(tu.Message(user_id, messages.AnyTagText).WithParseMode(telego.ModeHTML))
-		if botErr != nil {
-			log.Printf("send message error: %v\n", botErr)
-		}
+		// _, botErr := bot.SendMessage(
+		// 	tu.Message(userId, messages.AnyTagText).
+		// 		WithParseMode(telego.ModeHTML),
+		// )
+		// if botErr != nil {
+		// 	log.Printf("send message error: %v\n", botErr)
+		// }
 
-		callback := tu.CallbackQuery(callback_id)
-		err = bot.AnswerCallbackQuery(callback)
-		if err != nil {
-			tags.logger.Errorf("send answer callback to %v callback: %v", callback_id, err)
-		}
+		// keyboard := tu.Keyboard(
+		// 	tu.KeyboardRow(
+		// 		tu.KeyboardButton(
+		// 			"Find Pins",
+		// 		),
+		// 	),
+		// )
+
+		// _, botErr = bot.SendMessage(
+		// 	tu.Message(userId, "").
+		// 		WithReplyMarkup(keyboard).
+		// 		WithParseMode(telego.ModeHTML),
+		// )
+		// if botErr != nil {
+		// 	log.Printf("send message error: %v\n", botErr)
+		// }
+
+		// callback := tu.CallbackQuery(callbackId)
+		// err = bot.AnswerCallbackQuery(callback)
+		// if err != nil {
+		// 	tags.logger.Errorf("send answer callback to %v callback: %v", callbackId, err)
+		// }
 	}
 }
 
 func (tags *TagsCommand) NewTagsCommand() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
-		if update.Message == nil {
-			return
-		}
+		userId := tu.ID(update.Message.From.ID)
 
 		messages, err := config.InitCommandsText("locales/en.yaml")
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		userId := tu.ID(update.Message.From.ID)
 
 		pinsName := update.Message.Text
 		if pinsName == "" {
@@ -228,7 +216,7 @@ func (tags *TagsCommand) NewTagsCommand() th.Handler {
 			buttonMessage := tu.Message(
 				userId,
 				messages.SuccessfulSearchByTags+update.Message.Text,
-			)
+			).WithReplyMarkup(tu.ForceReply())
 			_, buttonErr := bot.SendMessage(buttonMessage)
 			if buttonErr != nil {
 				tags.logger.Errorf("send button error: %v\n", buttonErr)
@@ -237,17 +225,6 @@ func (tags *TagsCommand) NewTagsCommand() th.Handler {
 			sendPhotoParams := tags.handleNextImageQuery(
 				userId,
 				update,
-			).WithReplyMarkup(
-				tu.InlineKeyboard(
-					tu.InlineKeyboardRow(
-						tu.InlineKeyboardButton("Download this image").
-							WithCallbackData("download"),
-					),
-					tu.InlineKeyboardRow(
-						tu.InlineKeyboardButton("Cancel").
-							WithCallbackData("cancel"),
-					),
-				),
 			).WithReplyMarkup(tu.Keyboard(
 				tu.KeyboardRow(
 					tu.KeyboardButton(
@@ -271,17 +248,6 @@ func (tags *TagsCommand) NewTagsCommand() th.Handler {
 				sendPhotoParams := tags.handleNextImageQuery(
 					userId,
 					update,
-				).WithReplyMarkup(
-					tu.InlineKeyboard(
-						tu.InlineKeyboardRow(
-							tu.InlineKeyboardButton("Download this image").
-								WithCallbackData("download"),
-						),
-						tu.InlineKeyboardRow(
-							tu.InlineKeyboardButton("Cancel").
-								WithCallbackData("cancel"),
-						),
-					),
 				).WithReplyMarkup(tu.Keyboard(
 					tu.KeyboardRow(
 						tu.KeyboardButton(

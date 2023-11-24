@@ -10,6 +10,13 @@ import (
 	"log"
 )
 
+type CommandsHandler struct {
+	StartCommand  *StartCommand
+	BoardsCommand *BoardsCommand
+	TagsCommand   *TagsCommand
+	HelpCommand   *HelpCommand
+}
+
 type StartCommand struct {
 	*types.CommandsOptions
 	logger *logrus.Logger
@@ -88,6 +95,25 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 	)
 	return inlineKeyBoard
 }
+
+
+func (start *StartCommand) NotSupportedCommand() th.Handler {
+	return func(bot *telego.Bot, update telego.Update) {
+		// if update.Message.Text != commands {
+			// _, err := bot.SendMessage(
+			// 	MessageError(
+			// 		tu.ID(update.Message.From.ID),
+			// 		1,
+			// 		"Unknow command. you can use /start",
+			// 		true,
+			// 	),
+			// )
+			// if err != nil {
+			// 	start.logger.Errorf("send message error: %v\n", err)
+			// }
+		}
+	}
+// }
 
 func (start *StartCommand) HandleStartCallback() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
