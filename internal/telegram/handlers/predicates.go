@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/pinterest_service"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
@@ -46,14 +47,17 @@ func (p *PredicateService) PinterestServicePredicate(step string) th.Predicate {
 	}
 }
 
-func (p *PredicateService) NewTagsPredicate() th.Predicate {
-	return func(update telego.Update) bool {
-		if update.Message == nil ||
-		update.Message.ReplyToMessage == nil ||
-		update.Message.ReplyToMessage.Text == "" {
-
-			return update.Message.ReplyToMessage.Text == "/find_pins"
-		}
-		return false
+func (p *PredicateService) NewTagsPredicate(update telego.Update) bool {
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	if update.Message != nil &&
+	update.Message.ReplyToMessage != nil &&
+	update.Message.ReplyToMessage.Text != "" {
+		return update.Message.ReplyToMessage.Text == messages.AnyTagText
+	}
+	return false
 }
+

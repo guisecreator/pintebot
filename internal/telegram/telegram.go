@@ -1,8 +1,6 @@
 package telegram
 
 import (
-	"context"
-	"fmt"
 	"github.com/celestix/gotgproto"
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/types"
@@ -29,7 +27,7 @@ func NewTelegram(
 	cfg config.Config,
 	botServices types.BotServices,
 	token string,
-	log *logrus.Logger,
+	logg *logrus.Logger,
 ) (*TgBotService, error) {
 	apiBotService := &TgBotService{}
 
@@ -38,12 +36,12 @@ func NewTelegram(
 		telego.WithDefaultDebugLogger(),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("bot: %v", err)
+		return nil, err
 	}
 
 	updates, err := bot.UpdatesViaLongPolling(nil)
 	if err != nil {
-		return nil, fmt.Errorf("updates: %v", err)
+		return nil, err
 	}
 
 	botHandler, err := th.NewBotHandler(
@@ -52,7 +50,7 @@ func NewTelegram(
 		th.WithStopTimeout(5*time.Second),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("bh: %v", err)
+		return nil, err
 	}
 
 	botHandler.Group()
@@ -60,17 +58,13 @@ func NewTelegram(
 	done := make(chan struct{}, 1)
 	stop := make(chan struct{}, 1)
 
-	//Middleware here
-	//botHandler.Use(func(bot *telego.Bot, update telego.Update, next th.Handler) {
-	//	next(bot, update)
-	//})
-
+	//middleware here
 	botHandler.Use(
 		func(bot *telego.Bot, update telego.Update, next th.Handler) {
 			go func() {
 				defer func() {
 					if r := recover(); r != nil {
-						log.Error(r)
+						logg.Error(r)
 					}
 				}()
 				next(bot, update)
@@ -86,7 +80,7 @@ func NewTelegram(
 		Bot:         bot,
 		BotServices: botServices,
 		Handlers:    botHandler,
-		Logger:      *log,
+		Logger:      *logg,
 		stop:        stop,
 		done:        done,
 	}
@@ -94,7 +88,7 @@ func NewTelegram(
 	return apiBotService, nil
 }
 
-func (service *TgBotService) StartService(ctx context.Context) error {
+func (service *TgBotService) StartService() error {
 	service.handleStopSignal()
 
 	service.handlersInit()
@@ -106,32 +100,33 @@ func (service *TgBotService) StartService(ctx context.Context) error {
 		syscall.SIGTERM,
 	)
 
-	go func() {
-		<-signals
-		service.Stop()
-		service.
-			Logger.
-			Info("Telegram service stopped")
-	}()
-
 	go service.Handlers.Start()
 	service.
 		Logger.
 		Info("Telegram service started")
 
 	if !service.Handlers.IsRunning() {
-		return fmt.Errorf("service is not running")
+		service.
+			Logger.
+			Fatal("Telegram service crashed or could not start")
+		return nil
 	}
+
+	//stopping the bot
+	go func() {
+		<-signals
+
+		go func() {
+			service.stop <- struct{}{}
+			service.
+				Logger.
+				Info("Telegram service stopped")
+		}()
+	}()
 
 	<-service.done
 
 	return nil
-}
-
-func (service *TgBotService) Stop() {
-	go func() {
-		service.stop <- struct{}{}
-	}()
 }
 
 func (service *TgBotService) handleStopSignal() {
@@ -140,7 +135,7 @@ func (service *TgBotService) handleStopSignal() {
 
 		service.
 			Logger.
-			Info("Stopping...")
+			Info("Stopping the rest...")
 
 		service.Bot.StopLongPolling()
 		service.

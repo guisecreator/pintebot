@@ -6,7 +6,6 @@ import (
 	"github.com/guisecreator/pintebot/internal/state"
 	"github.com/guisecreator/pintebot/internal/telegram/types"
 	"github.com/mymmrac/telego"
-	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -114,6 +113,46 @@ func (tags *TagsCommand) handleUserMessage(
 	return user, nil
 }
 
+// func (tags *TagsCommand) handleNextImageQuery(
+// 	chatID telego.ChatID,
+// 	update telego.Update,
+// ) *telego.SendPhotoParams {
+// 	if chatID.ID == 0 {
+// 		tags.logger.Error("Empty chatID")
+// 		return nil
+// 	}
+
+// 	imageList, exist := tags.UserImageStore.ImageLists[chatID.ID]
+// 	if !exist {
+// 		tags.logger.Error("Empty image list")
+// 		return nil
+// 	}
+
+// 	currentIndex, exists := tags.UserImageStore.CurrentIndices[chatID.ID]
+// 	if !exists {
+// 		currentIndex = 0
+// 	}
+
+// 	// increment the index or reset if the end of the list is reached
+// 	currentIndex = (currentIndex + 1) % len(imageList)
+// 	tags.UserImageStore.CurrentIndices[chatID.ID] = currentIndex
+
+// 	imageData := []byte(imageList[currentIndex])
+// 	reader := bytes.NewReader(imageData)
+
+// 	photo := telego.InputFile{
+// 		File: tu.NameReader(reader, "image"),
+// 	}
+
+// 	return &telego.SendPhotoParams{
+// 		ChatID:              tu.ID(chatID.ID),
+// 		Photo:               photo,
+// 		DisableNotification: false,
+// 		ParseMode:           telego.ModeHTML,
+// 		Caption:             "",
+// 	}
+// }
+
 func (tags *TagsCommand) handleNextImageQuery(
 	chatID telego.ChatID,
 	update telego.Update,
@@ -135,93 +174,107 @@ func (tags *TagsCommand) handleNextImageQuery(
 	}
 }
 
-func (tags *TagsCommand) MessageTag() th.Handler {
-	return func(bot *telego.Bot, update telego.Update) {
-		// userId := tu.ID(update.Message.From.ID)
+func (tags *TagsCommand) MessageTag(bot *telego.Bot, update telego.Update) {
+	userId := tu.ID(update.Message.Chat.ID)
 
-		// messages, err := config.InitCommandsText("locales/en.yaml")
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		// _, botErr := bot.SendMessage(
-		// 	tu.Message(userId, messages.AnyTagText).
-		// 		WithParseMode(telego.ModeHTML),
-		// )
-		// if botErr != nil {
-		// 	log.Printf("send message error: %v\n", botErr)
-		// }
+	// keyboard := tu.Keyboard(
+	// 	tu.KeyboardRow(
+	// 		tu.KeyboardButton(
+	// 			"find_pins",
+	// 		),
+	// 	),
+	// ).WithResizeKeyboard().
+	// WithInputFieldPlaceholder("Enter pin name")
 
-		// keyboard := tu.Keyboard(
-		// 	tu.KeyboardRow(
-		// 		tu.KeyboardButton(
-		// 			"Find Pins",
-		// 		),
-		// 	),
-		// )
-
-		// _, botErr = bot.SendMessage(
-		// 	tu.Message(userId, "").
-		// 		WithReplyMarkup(keyboard).
-		// 		WithParseMode(telego.ModeHTML),
-		// )
-		// if botErr != nil {
-		// 	log.Printf("send message error: %v\n", botErr)
-		// }
-
-		// callback := tu.CallbackQuery(callbackId)
-		// err = bot.AnswerCallbackQuery(callback)
-		// if err != nil {
-		// 	tags.logger.Errorf("send answer callback to %v callback: %v", callbackId, err)
-		// }
+	_, botErr := bot.SendMessage(
+		tu.Message(userId, messages.AnyTagText).
+			WithReplyMarkup(tu.ForceReply()),
+	)
+	if botErr != nil {
+		log.Fatalf("send message error: %v\n", botErr)
 	}
 }
 
-func (tags *TagsCommand) NewTagsCommand() th.Handler {
-	return func(bot *telego.Bot, update telego.Update) {
-		userId := tu.ID(update.Message.From.ID)
+func (tags *TagsCommand) NewTagsCommand(bot *telego.Bot, update telego.Update) {
+	userId := tu.ID(update.Message.From.ID)
 
-		messages, err := config.InitCommandsText("locales/en.yaml")
-		if err != nil {
-			log.Fatal(err)
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pinsName := update.Message.Text
+	if pinsName == "" {
+		_, msgErr := bot.SendMessage(
+			MessageError(userId, 1, "Message Error", true),
+		)
+		if msgErr != nil {
+			tags.logger.Errorf("send message to %v user: %v", userId, msgErr)
+		}
+		return
+	}
+
+	if update.Message.From.ID == 0 {
+			return
+	}
+
+	//remove it
+	if tags.UserImageStore == nil {
+		tags.UserImageStore = &UserImageStore{
+			ImageLists:     make(map[int64][]string),
+			CurrentIndices: make(map[int64]int),
+			UserStates:     make(map[int64]state.UserState),
+		}
+	}
+	if tags.UserImageStore.UserStates == nil {
+		tags.UserImageStore.UserStates = make(map[int64]state.UserState)
+	}
+
+	// get state of user
+	userState := state.GetUserState(
+		userId.ID,
+		tags.UserImageStore.UserStates,
+	)
+
+	switch userState {
+	case state.StateInitial:
+		buttonMessage := tu.Message(
+			userId,
+			messages.SuccessfulSearchByTags+update.Message.Text,
+		).WithReplyMarkup(tu.ForceReply())
+		_, buttonErr := bot.SendMessage(buttonMessage)
+		if buttonErr != nil {
+			tags.logger.Errorf("send button error: %v\n", buttonErr)
 		}
 
-		pinsName := update.Message.Text
-		if pinsName == "" {
-			_, msgErr := bot.SendMessage(
-				MessageError(userId, 1, "Message Error", true),
-			)
-			if msgErr != nil {
-				tags.logger.Errorf("send message to %v user: %v", userId, msgErr)
-			}
+		sendPhotoParams := tags.handleNextImageQuery(
+			userId,
+			update,
+		).WithReplyMarkup(tu.Keyboard(
+			tu.KeyboardRow(
+				tu.KeyboardButton(
+					messages.TagsCommand.InlineKeyboard.
+						KeyboardRow1.NextButton,
+				),
+			),
+		).WithResizeKeyboard())
+
+		_, sendPhotoErr := bot.SendPhoto(sendPhotoParams)
+		if sendPhotoErr != nil {
+			tags.logger.Errorf("send photo error: %v\n", sendPhotoErr)
 			return
 		}
 
-		if tags.UserImageStore == nil {
-			tags.UserImageStore = &UserImageStore{
-				ImageLists:     make(map[int64][]string),
-				CurrentIndices: make(map[int64]int),
-				UserStates:     make(map[int64]state.UserState),
-			}
-		}
-		if tags.UserImageStore.UserStates == nil {
-			tags.UserImageStore.UserStates = make(map[int64]state.UserState)
-		}
+		// update the user's state.
+		state.SetUserState(userId.ID, state.StateImageSent, tags.UserImageStore.UserStates)
 
-		// get state of user
-		userState := state.GetUserState(userId.ID, tags.UserImageStore.UserStates)
-
-		switch userState {
-		case state.StateInitial:
-			buttonMessage := tu.Message(
-				userId,
-				messages.SuccessfulSearchByTags+update.Message.Text,
-			).WithReplyMarkup(tu.ForceReply())
-			_, buttonErr := bot.SendMessage(buttonMessage)
-			if buttonErr != nil {
-				tags.logger.Errorf("send button error: %v\n", buttonErr)
-			}
-
+	case state.StateImageSent:
+		if pinsName == "Next ⬇️" {
 			sendPhotoParams := tags.handleNextImageQuery(
 				userId,
 				update,
@@ -238,30 +291,6 @@ func (tags *TagsCommand) NewTagsCommand() th.Handler {
 			if sendPhotoErr != nil {
 				tags.logger.Errorf("send photo error: %v\n", sendPhotoErr)
 				return
-			}
-
-			// update the user's state.
-			state.SetUserState(userId.ID, state.StateImageSent, tags.UserImageStore.UserStates)
-
-		case state.StateImageSent:
-			if pinsName == "Next ⬇️" {
-				sendPhotoParams := tags.handleNextImageQuery(
-					userId,
-					update,
-				).WithReplyMarkup(tu.Keyboard(
-					tu.KeyboardRow(
-						tu.KeyboardButton(
-							messages.TagsCommand.InlineKeyboard.
-								KeyboardRow1.NextButton,
-						),
-					),
-				).WithResizeKeyboard())
-
-				_, sendPhotoErr := bot.SendPhoto(sendPhotoParams)
-				if sendPhotoErr != nil {
-					tags.logger.Errorf("send photo error: %v\n", sendPhotoErr)
-					return
-				}
 			}
 		}
 	}

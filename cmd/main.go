@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/telegram"
 	"github.com/guisecreator/pintebot/internal/types"
@@ -21,18 +20,14 @@ func main() {
 		logg.Panicf("commands init: %v", err)
 	}
 
-	//pinterestService, err := pinterest.NewPinterestService()
-	//if err != nil {
-	//	logg.Panicf("pinterest service init: %v", err)
-	//}
-	//
-	//pinterestService.Authenticate(cfg.ClientId, cfg.ClientSecret, cfg.AccessCode)
-
-	ctx, _ := context.WithCancel(context.Background())
+	// pinterestService, err := pinterest.NewPinterestService(*cfg)
+	// if err != nil {
+	// 	logg.Panicf("pinterest service init: %v", err)
+	// }
 
 	services := &types.BotServices{
 		Config: cfg,
-		//PinterestAPI: pinterestService,
+		// PinterestAPI: pinterestService,
 	}
 
 	bot, err := telegram.NewTelegram(*cfg, *services, cfg.TgToken, logg)
@@ -40,5 +35,5 @@ func main() {
 		logg.Panicf("telegram service init: %v", err)
 	}
 
-	bot.StartService(ctx)
+	bot.StartService()
 }

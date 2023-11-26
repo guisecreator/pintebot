@@ -61,7 +61,7 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 				messages.StartCommand.InlineKeyboard.
 					KeyboardRow1.FindPinViaTagButton,
 			).
-				WithCallbackData("find_pin_via_tag"),
+				WithCallbackData("find"),
 		),
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(
@@ -95,25 +95,6 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 	)
 	return inlineKeyBoard
 }
-
-
-func (start *StartCommand) NotSupportedCommand() th.Handler {
-	return func(bot *telego.Bot, update telego.Update) {
-		// if update.Message.Text != commands {
-			// _, err := bot.SendMessage(
-			// 	MessageError(
-			// 		tu.ID(update.Message.From.ID),
-			// 		1,
-			// 		"Unknow command. you can use /start",
-			// 		true,
-			// 	),
-			// )
-			// if err != nil {
-			// 	start.logger.Errorf("send message error: %v\n", err)
-			// }
-		}
-	}
-// }
 
 func (start *StartCommand) HandleStartCallback() th.Handler {
 	return func(bot *telego.Bot, update telego.Update) {
