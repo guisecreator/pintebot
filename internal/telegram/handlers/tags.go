@@ -36,6 +36,7 @@ func (tags *TagsCommand) GetImageList(
 		return nil, err
 	}
 
+	//вот этот кринж убрать
 	if tags.UserImageStore == nil {
 		tags.UserImageStore = &UserImageStore{
 			ImageLists:     make(map[int64][]string),
@@ -43,9 +44,7 @@ func (tags *TagsCommand) GetImageList(
 		}
 	}
 
-	pins, err := tags.Services.
-		PinterestAPI.
-		GetPinsBySearch(messageRequest)
+	pins, err := tags.Services.PinterestAPI.GetPinsBySearch(messageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +181,7 @@ func (tags *TagsCommand) MessageTag(bot *telego.Bot, update telego.Update) {
 		log.Fatal(err)
 	}
 
-	// keyboard := tu.Keyboard(
+		// keyboard := tu.Keyboard(
 	// 	tu.KeyboardRow(
 	// 		tu.KeyboardButton(
 	// 			"find_pins",

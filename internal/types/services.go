@@ -3,17 +3,15 @@ package types
 import (
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/db/models"
+	"github.com/guisecreator/pintebot/internal/message_handler"
+	"github.com/guisecreator/pintebot/internal/pics_service"
 	"github.com/guisecreator/pintebot/internal/pinterest"
-	"github.com/guisecreator/pintebot/internal/pinterest_service"
 )
 
 type BotServices struct {
-	Config       *config.Config
-	PinterestAPI *pinterest.PinterestServiceApi
-	//Boards       *pinterest.PinterestServiceApi
-	//Tags         *pinterest_api.Pin
-	Tags  *models.Tag
-	Users *models.User
-
-	PinterestService *pinterest_service.PinterestService
+	Config          *config.Config
+	Tags            *models.Tag
+	MessageHandler  message_handler.MessageHandler
+	PinterestClient *pinterest.Client
+	PicsService     *pics_service.PicsService
 }

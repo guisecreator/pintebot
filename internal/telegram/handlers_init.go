@@ -6,23 +6,23 @@ import (
 )
 
 func (service *TgBotService) handlersInit() error {
-	handlersInit :=  handlers.CommandsHandler{}
+	handlersInit := handlers.CommandsHandler{}
 
-	ps := service.BotServices.PinterestService
+	ps := service.BotServices.PicsService
 	predicate := handlers.NewPredicateService(ps)
 
 	service.Handlers.Handle(
-		handlersInit.StartCommand.NewStartCommand(),
+		handlersInit.StartCommand.NewStartCommand,
 		th.CommandEqual("start"),
 	)
 
 	service.Handlers.Handle(
-		handlersInit.StartCommand.HandleStartCallback(),
+		handlersInit.StartCommand.HandleStartCallback,
 		th.CallbackDataEqual("cancel"),
 	)
 
 	service.Handlers.Handle(
-		handlersInit.BoardsCommand.NewBoardCommand(),
+		handlersInit.BoardsCommand.NewBoardCommand,
 		th.CallbackDataEqual("boards"),
 	)
 

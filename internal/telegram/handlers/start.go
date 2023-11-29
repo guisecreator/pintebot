@@ -4,7 +4,6 @@ import (
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/telegram/types"
 	"github.com/mymmrac/telego"
-	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/sirupsen/logrus"
 	"log"
@@ -96,58 +95,55 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 	return inlineKeyBoard
 }
 
-func (start *StartCommand) HandleStartCallback() th.Handler {
-	return func(bot *telego.Bot, update telego.Update) {
-		inlineKeyBoard := BuildKeyboard()
+func (start *StartCommand) HandleStartCallback(bot *telego.Bot, update telego.Update) {
+	inlineKeyBoard := BuildKeyboard()
 
-		callbackId := update.CallbackQuery.ID
-		userId := tu.ID(update.CallbackQuery.From.ID)
+	callbackId := update.CallbackQuery.ID
+	userId := tu.ID(update.CallbackQuery.From.ID)
 
-		messages, err := config.InitCommandsText("locales/en.yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		_, Boterr := bot.SendMessage(tu.Message(userId, messages.Description).
-			WithReplyMarkup(inlineKeyBoard).
-			WithParseMode(telego.ModeHTML))
-		if err != nil {
-			start.logger.Errorf("send message error: %v\n", Boterr)
-		}
+	_, Boterr := bot.SendMessage(tu.Message(userId, messages.Description).
+		WithReplyMarkup(inlineKeyBoard).
+		WithParseMode(telego.ModeHTML))
+	if err != nil {
+		start.logger.Errorf("send message error: %v\n", Boterr)
+	}
 
-		callback := tu.CallbackQuery(callbackId)
-		err = bot.AnswerCallbackQuery(callback)
-		if err != nil {
-			start.logger.Errorf("answer callback error: %v\n", err)
-		}
+	callback := tu.CallbackQuery(callbackId)
+	err = bot.AnswerCallbackQuery(callback)
+	if err != nil {
+		start.logger.Errorf("answer callback error: %v\n", err)
 	}
 }
 
-func (start *StartCommand) NewStartCommand() th.Handler {
-	return func(bot *telego.Bot, update telego.Update) {
-		inlineKeyBoard := BuildKeyboard()
+func (start *StartCommand) NewStartCommand(bot *telego.Bot, update telego.Update) {
+	inlineKeyBoard := BuildKeyboard()
 
-		user_id := tu.ID(update.Message.From.ID)
+	user_id := tu.ID(update.Message.From.ID)
 
-		messages, err := config.InitCommandsText("locales/en.yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		msgTextHello := messages.Description
-		if msgTextHello == "" {
-			msgTextHello = "Hello! I'm PinteBot and my greeting is broken."
-		}
+	msgTextHello := messages.Description
+	if msgTextHello == "" {
+		msgTextHello = "Hello! I'm PinteBot and my greeting is broken."
+	}
 
-		message := tu.Message(
-			user_id,
-			msgTextHello,
-		).WithReplyMarkup(inlineKeyBoard).
-			WithParseMode(telego.ModeHTML)
+	message := tu.Message(
+		user_id,
+		msgTextHello,
+	).WithReplyMarkup(inlineKeyBoard).
+		WithParseMode(telego.ModeHTML)
 
-		_, sendMsgErr := bot.SendMessage(message)
-		if sendMsgErr != nil {
-			log.Printf("send message error: %v\n", sendMsgErr)
-		}
+	_, sendMsgErr := bot.SendMessage(message)
+	if sendMsgErr != nil {
+		log.Printf("send message error: %v\n", sendMsgErr)
 	}
 }
+

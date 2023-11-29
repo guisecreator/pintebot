@@ -1,4 +1,4 @@
-package img_processing
+package pics_service
 
 import (
 	"github.com/disintegration/imaging"
@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func FormatImageForTelegram(
+func FormattingImageForTelegram(
 	update telego.Update,
 	path string,
 ) (*telego.InputFile, error) {

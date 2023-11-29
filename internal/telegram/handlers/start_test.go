@@ -115,7 +115,7 @@ func TestStartCommand_HandleStartCallback(t *testing.T) {
 	mockCommandsOptionsInstance.On("InitCommandsText", mock.Anything)
 	mockTypesServicesInstance.On("InitCommandsText", mock.Anything)
 
-	startCommand.HandleStartCallback()(&mockBotInstance.Bot, telego.Update{})
+	startCommand.HandleStartCallback(&mockBotInstance.Bot, telego.Update{})
 
 	mockBotInstance.AssertExpectations(t)
 	mockCommandsOptionsInstance.AssertExpectations(t)

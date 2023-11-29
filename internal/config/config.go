@@ -9,17 +9,17 @@ import (
 )
 
 type Config struct {
-	TgEnabled     bool
-	TgBotAdmins   string `required:"true"   envconfig:"TELEGRAM_BOT_ADMINS"`
-	TgToken       string `required:"true"   envconfig:"TELEGRAM_TOKEN"`
-	AppID         int    `required:"false"  envconfig:"APP_ID"`
-	ApiHash       string `required:"false"  envconfig:"API_HASH"`
-	PUserToken    string `required:"false"  envconfig:"PINTEREST_TOKEN"`
-	PClientId     string `required:"false"  envconfig:"PINTEREST_CLIENT_ID"`
-	PClientSecret string `required:"false"  envconfig:"PINTEREST_CLIENT_SECRET"`
-	DatabaseURL   string `required:"false"  envconfig:"DATABASE_URL"`
-	CType         gotgproto.ClientType
-	CmdText       CommandsText
+	TgEnabled     	bool
+	TgBotAdmins   	string `required:"true"   envconfig:"TELEGRAM_BOT_ADMINS"`
+	TgToken       	string `required:"true"   envconfig:"TELEGRAM_TOKEN"`
+	AppID         	int    `required:"false"  envconfig:"APP_ID"`
+	ApiHash         string `required:"false"  envconfig:"API_HASH"`
+	PAccessToken    string `required:"false"  envconfig:"PINTEREST_ACCESS_TOKEN"`
+	PClientId     	string `required:"false"  envconfig:"PINTEREST_CLIENT_ID"`
+	PClientSecret 	string `required:"false"  envconfig:"PINTEREST_CLIENT_SECRET"`
+	DatabaseURL   	string `required:"false"  envconfig:"DATABASE_URL"`
+	CType        	  gotgproto.ClientType
+	CmdText       	CommandsText
 }
 
 var processEnv = envconfig.Process
