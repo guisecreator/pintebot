@@ -111,7 +111,6 @@ func (service *TgBotService) StartService() error {
 		return nil
 	}
 
-	//stopping the bot
 	go func() {
 		<-signals
 
