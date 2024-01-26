@@ -21,10 +21,12 @@ func main() {
 		logg.Panicf("commands init: %v", err)
 	}
 
-	pinterestClient, err := pinterest.NewClient(
+	//userAccessToken := pinterest.GetUserAccessToken()
+
+	pinterestClient, err := pinterest.NewPinterestClient(
 		cfg.PAccessToken,
-		cfg.PClientSecret,
 		cfg.PClientId,
+		cfg.PClientSecret,
 	)
 	if err != nil {
 		logg.Panicf("pinterest client init: %v", err)

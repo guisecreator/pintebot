@@ -12,6 +12,6 @@ type BotServices struct {
 	Config          *config.Config
 	Tags            *models.Tag
 	MessageHandler  message_handler.MessageHandler
-	PinterestClient *pinterest.Client
+	PinterestClient *pinterest.PinterestClient
 	PicsService     *pics_service.PicsService
 }

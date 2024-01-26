@@ -10,7 +10,6 @@ import (
 
 type Config struct {
 	TgEnabled     	bool
-	TgBotAdmins   	string `required:"true"   envconfig:"TELEGRAM_BOT_ADMINS"`
 	TgToken       	string `required:"true"   envconfig:"TELEGRAM_TOKEN"`
 	AppID         	int    `required:"false"  envconfig:"APP_ID"`
 	ApiHash         string `required:"false"  envconfig:"API_HASH"`

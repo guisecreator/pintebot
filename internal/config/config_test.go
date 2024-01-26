@@ -45,7 +45,6 @@ func TestConfig(t *testing.T) {
 				assert.Equal(t, "1", config.TgToken)
 				assert.Equal(t, "2", config.ApiHash)
 				assert.Equal(t, "3", config.TgEnabled)
-				assert.Equal(t, "4", config.TgBotAdmins)
 				assert.Equal(t, "5", config.DatabaseURL)
 				assert.Equal(t, "6", config.PAccessToken)
 				assert.Equal(t, "7", config.PClientId)

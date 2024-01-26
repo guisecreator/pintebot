@@ -1,15 +1,19 @@
-description: "Hello! My name is PinteBot and my task is to show pics based on your requests."
+description: "Hello! My name is PinteBot and my task is to find pins and boards from pinterest."
 any_tag_text: "Enter any tag by which you want to find the pin:"
 successful_search_by_tags: "The following pins were found matching your search:"
 
 help_info_text: "This bot is designed to help you find interesting pins (pictures) and boards from the Pinterest site that you need. If you notice a malfunction in the bot, you can inform me about it by the following contacts:"
 
+login_url: "https://redirect.me"
+
 start_command:
   inline_keyboard:
     keyboard_row_1:
-      find_pin_via_tag_button: "Find pins 🅿️"
+      find_pin_via_tag_button: "Find pins via tag🅿️"
+    keyboard_row_11:
+      find_pin_by_username: "Find pins by Username 🅿️"
     keyboard_row_2:
-      boards_button: "Find boards 🅱️"
+      boards_button: "Find all user boards 🅱️"
     keyboard_row_3:
       settings_button: "Languages 🌍"
     keyboard_row_4:

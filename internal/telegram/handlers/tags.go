@@ -1,116 +1,98 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/guisecreator/pintebot/internal/config"
 	"github.com/guisecreator/pintebot/internal/state"
 	"github.com/guisecreator/pintebot/internal/telegram/types"
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"github.com/sirupsen/logrus"
-	"io"
 	"log"
-	"net/http"
 	"os"
 )
 
-type UserImageStore struct {
-	ImageLists     map[int64][]string
-	CurrentIndices map[int64]int
-	UserStates     map[int64]state.UserState
-}
-
 type TagsCommand struct {
 	*types.CommandsOptions
-	logger         *logrus.Logger
-	UserImageStore *UserImageStore
+	logger *logrus.Logger
 }
 
-func (tags *TagsCommand) GetImageList(
-	update telego.Update,
-) ([]string, error) {
-	chatID := update.Message.Chat.ID
+//func (tags *TagsCommand) GetImageList(
+//	update telego.Update,
+//) ([]string, error) {
+//	chatID := update.Message.Chat.ID
+//
+//	messageRequest, err := tags.handleUserMessage(update)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	pins, err := tags.Services.Pinterest.GetPinsBySearch(messageRequest)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	userImageList, exists := tags.UserImageStore.ImageLists[chatID]
+//	if !exists {
+//		tags.logger.Errorf("Empty image list for chatID: %d", chatID)
+//		userImageList = make([]string, 0)
+//	}
+//
+//	for _, pin := range *pins {
+//		if pin.Id == "" && pin.Url == "" {
+//			log.Fatal("Empty id or url")
+//			return nil, err
+//		}
+//
+//		imageData, imgErr := http.NewRequest("GET", pin.Url, nil)
+//		if err != nil {
+//			return nil, imgErr
+//		}
+//		defer imageData.Body.Close()
+//
+//		imageName := fmt.Sprintf("media/%s/%s.jpg", messageRequest, pin.Note)
+//		imageFile, createErr := os.Create(imageName)
+//		if createErr != nil {
+//			return nil, createErr
+//		}
+//		defer imageFile.Close()
+//
+//		_, copyErr := io.Copy(imageFile, imageData.Body)
+//		if copyErr != nil {
+//			return nil, copyErr
+//		}
+//
+//		userImageList = append(userImageList, imageName)
+//	}
+//
+//	tags.UserImageStore.ImageLists[chatID] = userImageList
+//
+//	return userImageList, nil
+//}
 
-	messageRequest, err := tags.handleUserMessage(update)
-	if err != nil {
-		return nil, err
-	}
-
-	//вот этот кринж убрать
-	if tags.UserImageStore == nil {
-		tags.UserImageStore = &UserImageStore{
-			ImageLists:     make(map[int64][]string),
-			CurrentIndices: make(map[int64]int),
-		}
-	}
-
-	pins, err := tags.Services.PinterestAPI.GetPinsBySearch(messageRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	userImageList, exists := tags.UserImageStore.ImageLists[chatID]
-	if !exists {
-		tags.logger.Errorf("Empty image list for chatID: %d", chatID)
-		userImageList = make([]string, 0)
-	}
-
-	for _, pin := range *pins {
-		if pin.Id == "" && pin.Url == "" {
-			log.Fatal("Empty id or url")
-			return nil, err
-		}
-
-		imageData, imgErr := http.NewRequest("GET", pin.Url, nil)
-		if err != nil {
-			return nil, imgErr
-		}
-		defer imageData.Body.Close()
-
-		imageName := fmt.Sprintf("media/%s/%s.jpg", messageRequest, pin.Note)
-		imageFile, createErr := os.Create(imageName)
-		if createErr != nil {
-			return nil, createErr
-		}
-		defer imageFile.Close()
-
-		_, copyErr := io.Copy(imageFile, imageData.Body)
-		if copyErr != nil {
-			return nil, copyErr
-		}
-
-		userImageList = append(userImageList, imageName)
-	}
-
-	tags.UserImageStore.ImageLists[chatID] = userImageList
-
-	return userImageList, nil
-}
-
-func (tags *TagsCommand) handleUserMessage(
-	update telego.Update,
-) (string, error) {
-	var messageError = fmt.Sprintf(
-		"Empty message or wrong message: %s",
-		update.Message.Text,
-	)
-
-	user := update.Message.Text
-	if user == "" {
-		return messageError, nil
-	}
-
-	if update.Message.ReplyToMessage != nil {
-		user = update.Message.ReplyToMessage.Text
-		if user == "" {
-			return messageError, nil
-		}
-	}
-
-	tags.UserImageStore.CurrentIndices[update.Message.Chat.ID] = 0
-
-	return user, nil
-}
+//func (tags *TagsCommand) handleUserMessage(
+//	update telego.Update,
+//) (string, error) {
+//	var messageError = fmt.Sprintf(
+//		"Empty message or wrong message: %s",
+//		update.Message.Text,
+//	)
+//
+//	user := update.Message.Text
+//	if user == "" {
+//		return messageError, nil
+//	}
+//
+//	if update.Message.ReplyToMessage != nil {
+//		user = update.Message.ReplyToMessage.Text
+//		if user == "" {
+//			return messageError, nil
+//		}
+//	}
+//
+//	tags.UserImageStore.CurrentIndices[update.Message.Chat.ID] = 0
+//
+//	return user, nil
+//}
 
 // func (tags *TagsCommand) handleNextImageQuery(
 // 	chatID telego.ChatID,
@@ -181,7 +163,7 @@ func (tags *TagsCommand) MessageTag(bot *telego.Bot, update telego.Update) {
 		log.Fatal(err)
 	}
 
-		// keyboard := tu.Keyboard(
+	// keyboard := tu.Keyboard(
 	// 	tu.KeyboardRow(
 	// 		tu.KeyboardButton(
 	// 			"find_pins",
@@ -219,26 +201,11 @@ func (tags *TagsCommand) NewTagsCommand(bot *telego.Bot, update telego.Update) {
 	}
 
 	if update.Message.From.ID == 0 {
-			return
-	}
-
-	//remove it
-	if tags.UserImageStore == nil {
-		tags.UserImageStore = &UserImageStore{
-			ImageLists:     make(map[int64][]string),
-			CurrentIndices: make(map[int64]int),
-			UserStates:     make(map[int64]state.UserState),
-		}
-	}
-	if tags.UserImageStore.UserStates == nil {
-		tags.UserImageStore.UserStates = make(map[int64]state.UserState)
+		return
 	}
 
 	// get state of user
-	userState := state.GetUserState(
-		userId.ID,
-		tags.UserImageStore.UserStates,
-	)
+	userState := state.GetUserState(userId.ID, nil)
 
 	switch userState {
 	case state.StateInitial:
@@ -270,7 +237,7 @@ func (tags *TagsCommand) NewTagsCommand(bot *telego.Bot, update telego.Update) {
 		}
 
 		// update the user's state.
-		state.SetUserState(userId.ID, state.StateImageSent, tags.UserImageStore.UserStates)
+		state.SetUserState(userId.ID, state.StateImageSent, nil)
 
 	case state.StateImageSent:
 		if pinsName == "Next ⬇️" {

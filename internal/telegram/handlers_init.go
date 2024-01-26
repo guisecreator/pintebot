@@ -16,6 +16,12 @@ func (service *TgBotService) handlersInit() error {
 		th.CommandEqual("start"),
 	)
 
+	//Login command handler
+	service.Handlers.Handle(
+		handlersInit.StartCommand.SendLoginUrl,
+		th.TextEqual("/login"),
+	)
+
 	service.Handlers.Handle(
 		handlersInit.StartCommand.HandleStartCallback,
 		th.CallbackDataEqual("cancel"),
@@ -34,11 +40,6 @@ func (service *TgBotService) handlersInit() error {
 	service.Handlers.Handle(
 		handlersInit.TagsCommand.NewTagsCommand,
 		predicate.NewTagsPredicate,
-	)
-
-	service.Handlers.Handle(
-		handlersInit.HelpCommand.HelpCommand(),
-		th.CallbackDataEqual("help_info"),
 	)
 
 	return nil

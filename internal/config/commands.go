@@ -10,12 +10,17 @@ type CommandsText struct {
 	AnyTagText             string `yaml:"any_tag_text"`
 	SuccessfulSearchByTags string `yaml:"successful_search_by_tags"`
 	HelpInfoText           string `yaml:"help_info_text"`
+	LoginUrl 							 string `yaml:"login_url"`
 
 	StartCommand struct {
 		InlineKeyboard struct {
 			KeyboardRow1 struct {
 				FindPinViaTagButton string `yaml:"find_pin_via_tag_button"`
 			} `yaml:"keyboard_row_1"`
+
+			KeyboardRow11 struct {
+				FindPinByUsername string `yaml:"find_pin_by_username"`
+			} `yaml:"keyboard_row_11"`
 
 			KeyboardRow2 struct {
 				BoardsButton string `yaml:"boards_button"`

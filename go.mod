@@ -33,6 +33,7 @@ require (
 	github.com/gotd/ige v0.2.2 // indirect
 	github.com/gotd/neo v0.1.5 // indirect
 	github.com/gotd/td v0.89.0 // indirect
+	github.com/guisecreator/plient v0.0.0-20231211170307-38de7fd3309e // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.17.3 // indirect

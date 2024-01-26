@@ -13,7 +13,6 @@ type CommandsHandler struct {
 	StartCommand  *StartCommand
 	BoardsCommand *BoardsCommand
 	TagsCommand   *TagsCommand
-	HelpCommand   *HelpCommand
 }
 
 type StartCommand struct {
@@ -58,9 +57,9 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(
 				messages.StartCommand.InlineKeyboard.
-					KeyboardRow1.FindPinViaTagButton,
+					KeyboardRow11.FindPinByUsername,
 			).
-				WithCallbackData("find"),
+				WithCallbackData("find_by_username"),
 		),
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(
@@ -79,13 +78,6 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(
 				messages.StartCommand.InlineKeyboard.
-					KeyboardRow4.HelpButton,
-			).
-				WithCallbackData("help_info"),
-		),
-		tu.InlineKeyboardRow(
-			tu.InlineKeyboardButton(
-				messages.StartCommand.InlineKeyboard.
 					KeyboardRow5.ProjectButton,
 			).
 				WithCallbackData("project_on_github").
@@ -93,6 +85,24 @@ func BuildKeyboard() *telego.InlineKeyboardMarkup {
 		),
 	)
 	return inlineKeyBoard
+}
+
+func (start *StartCommand) SendLoginUrl(bot *telego.Bot, update telego.Update) {
+	messages, err := config.InitCommandsText("locales/en.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userId := tu.ID(update.Message.From.ID)
+
+	_, botErr := bot.SendMessage(tu.Message(
+		userId, messages.LoginUrl).
+		WithParseMode(telego.ModeHTML))
+	if err != nil {
+		start.
+			logger.
+			Errorf("send message error: %v\n", botErr)
+	}
 }
 
 func (start *StartCommand) HandleStartCallback(bot *telego.Bot, update telego.Update) {
@@ -146,4 +156,3 @@ func (start *StartCommand) NewStartCommand(bot *telego.Bot, update telego.Update
 		log.Printf("send message error: %v\n", sendMsgErr)
 	}
 }
-
